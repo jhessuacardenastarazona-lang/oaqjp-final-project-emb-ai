@@ -21,25 +21,38 @@ def emotion_detector(text_to_analyze):
         headers=headers
     )
 
-    response_data = json.loads(response.text)
-
-    emotion_scores = response_data["emotionPredictions"][0]["emotion"]
-
-    anger_score = emotion_scores["anger"]
-    disgust_score = emotion_scores["disgust"]
-    fear_score = emotion_scores["fear"]
-    joy_score = emotion_scores["joy"]
-    sadness_score = emotion_scores["sadness"]
-
     emotions = {
-        "anger": anger_score,
-        "disgust": disgust_score,
-        "fear": fear_score,
-        "joy": joy_score,
-        "sadness": sadness_score
+        "anger": None,
+        "disgust": None,
+        "fear": None,
+        "joy": None,
+        "sadness": None,
+        "dominant_emotion": None
     }
 
-    dominant_emotion = max(emotions, key=emotions.get)
-    emotions["dominant_emotion"] = dominant_emotion
+    if response.status_code == 400:
+        return emotions
+
+    response_data = json.loads(response.text)
+    emotion_scores = response_data["emotionPredictions"][0]["emotion"]
+
+    emotions["anger"] = emotion_scores["anger"]
+    emotions["disgust"] = emotion_scores["disgust"]
+    emotions["fear"] = emotion_scores["fear"]
+    emotions["joy"] = emotion_scores["joy"]
+    emotions["sadness"] = emotion_scores["sadness"]
+
+    emotions_only = {
+        "anger": emotions["anger"],
+        "disgust": emotions["disgust"],
+        "fear": emotions["fear"],
+        "joy": emotions["joy"],
+        "sadness": emotions["sadness"]
+    }
+
+    emotions["dominant_emotion"] = max(
+        emotions_only,
+        key=emotions_only.get
+    )
 
     return emotions
